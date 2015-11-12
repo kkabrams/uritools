@@ -123,6 +123,7 @@ int main(int argc,char *argv[]) {
   // printf("scheme://username:password@domain:port/path?query_string#fragment_id\n\n");
   //let's set them to what'll get printed now...
 
+#ifdef MAGIC
   u.scheme=AorB(u.scheme,AorB(getenv("CUTURL_SCHEME"),"DEFAULT"));
   u.username=AorB(u.username,AorB(getenv("CUTURL_USERNAME"),"DEFAULT"));
   u.password=AorB(u.password,AorB(getenv("CUTURL_PASSWORD"),"DEFAULT"));
@@ -133,6 +134,7 @@ int main(int argc,char *argv[]) {
   u.path=AorB(u.path,AorB(getenv("CUTURL_PATH"),"DEFAULT"));
   u.query_string=AorB(u.query_string,AorB(getenv("CUTURL_QUERY_STRING"),"DEFAULT"));
   u.fragment_id=AorB(u.fragment_id,AorB(getenv("CUTURL_FRAGMENT_ID"),"DEFAULT"));
+#endif
 
   if((name[0]=getenv("CUTURL__"))) {
    setenv("CUTURL__SCHEME",u.scheme,1);
