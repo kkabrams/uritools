@@ -38,7 +38,7 @@ int main(int argc,char *argv[]) {
     case 'f': if(u.fragment_id  && !strcmp(u.fragment_id,argv[i+1]))  printf("%s\n",copy); break;
     case 'D':
      if(u.domain && strlen(u.domain) >= strlen(argv[i+1]) && !strncmp(u.domain+strlen(u.domain)-strlen(argv[i+1]),argv[i+1],strlen(argv[i+1]))) 
-      printf("D: %s\n",copy);
+      printf("%s\n",copy);
      break;
     default:
      printf("unknown url part letter! '%c'\n",argv[i][0]);
