@@ -8,6 +8,8 @@
 
 #include "url.h"
 
+#define MAGIC
+
 /*
  schemes are case sensitive but cononicals are lower case.
  domain is case insensitive. return it lowercased?
@@ -161,14 +163,14 @@ int main(int argc,char *argv[]) {
   } else {
    if(c) {
     for(i=0;i<c;i++) {
-     if(args[i]&F_SCHEME) printf("%s\n",u.scheme);
-     if(args[i]&F_USERNAME) printf("%s\n",u.username);
-     if(args[i]&F_PASSWORD) printf("%s\n",u.password);
-     if(args[i]&F_DOMAIN) printf("%s\n",u.domain);
-     if(args[i]&F_PORT) printf("%s\n",u.port);
-     if(args[i]&F_PATH) printf("%s\n",u.path);
-     if(args[i]&F_QUERY_STRING) printf("%s\n",u.query_string);
-     if(args[i]&F_FRAGMENT_ID) printf("%s\n",u.fragment_id);
+     if(args[i]&F_SCHEME) printf("%s\n",AorB(u.scheme,""));
+     if(args[i]&F_USERNAME) printf("%s\n",AorB(u.username,""));
+     if(args[i]&F_PASSWORD) printf("%s\n",AorB(u.password,""));
+     if(args[i]&F_DOMAIN) printf("%s\n",AorB(u.domain,""));
+     if(args[i]&F_PORT) printf("%s\n",AorB(u.port,""));
+     if(args[i]&F_PATH) printf("%s\n",AorB(u.path,""));
+     if(args[i]&F_QUERY_STRING) printf("%s\n",AorB(u.query_string,""));
+     if(args[i]&F_FRAGMENT_ID) printf("%s\n",AorB(u.fragment_id,""));
     }
    } else {
     printf("scheme: %s\n",u.scheme);
