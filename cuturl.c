@@ -39,9 +39,7 @@ char *short_opts[]={"s","u","k","d","P","p","q","f"};
 int main(int argc,char *argv[]) {
  char *name[2];
  char *line=0;
- char sport[10];
  char args[256];
- struct servent *serv;
  int i,j,c=0;
  int size=1024;
  int status;
@@ -126,6 +124,8 @@ int main(int argc,char *argv[]) {
   //let's set them to what'll get printed now...
 
 #ifdef MAGIC
+  magic_and_defaults(&u);
+/*
   u.scheme=AorB(u.scheme,AorB(getenv("CUTURL_SCHEME"),"DEFAULT"));
   u.username=AorB(u.username,AorB(getenv("CUTURL_USERNAME"),"DEFAULT"));
   u.password=AorB(u.password,AorB(getenv("CUTURL_PASSWORD"),"DEFAULT"));
@@ -136,6 +136,7 @@ int main(int argc,char *argv[]) {
   u.path=AorB(u.path,AorB(getenv("CUTURL_PATH"),"DEFAULT"));
   u.query_string=AorB(u.query_string,AorB(getenv("CUTURL_QUERY_STRING"),"DEFAULT"));
   u.fragment_id=AorB(u.fragment_id,AorB(getenv("CUTURL_FRAGMENT_ID"),"DEFAULT"));
+*/
 #endif
 
   if((name[0]=getenv("CUTURL__"))) {

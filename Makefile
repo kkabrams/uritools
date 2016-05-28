@@ -10,6 +10,6 @@ clean:
 	rm -f matchurl
 	rm -f cuturl
 
-install:
+install: all
 	cp -f matchurl $(PREFIX)/bin/matchurl
 	cp -f cuturl $(PREFIX)/bin/cuturl

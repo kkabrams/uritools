@@ -1,3 +1,4 @@
+#include <netdb.h>
 #include <string.h>
 
 /*
@@ -126,4 +127,21 @@ void urlfromline(struct url *u,char *line) {
    u->username=u->password;
    u->password=0;
   }
+}
+
+#define AorB(a,b) ((a)?(a):(b))
+
+void magic_and_defaults(struct url *u) {
+  struct servent *serv;
+  char sport[10];
+  u->scheme=AorB(u->scheme,AorB(getenv("URL_SCHEME"),"DEFAULT"));
+  u->username=AorB(u->username,AorB(getenv("URL_USERNAME"),"DEFAULT"));
+  u->password=AorB(u->password,AorB(getenv("URL_PASSWORD"),"DEFAULT"));
+  u->domain=AorB(u->domain,AorB(getenv("URL_DOMAIN"),"DEFAULT"));
+  serv=getservbyname(u->scheme,strcmp(u->scheme,"udp")?"tcp":"udp");//gets default port for the scheme. http -> 80
+  if(serv) snprintf(sport,sizeof(sport)-1,"%d",ntohs(serv->s_port));
+  u->port=AorB(u->port,AorB(getenv("URL_PORT"),(serv?sport:"DEFAULT")));
+  u->path=AorB(u->path,AorB(getenv("URL_PATH"),"DEFAULT"));
+  u->query_string=AorB(u->query_string,AorB(getenv("URL_QUERY_STRING"),"DEFAULT"));
+  u->fragment_id=AorB(u->fragment_id,AorB(getenv("URL_FRAGMENT_ID"),"DEFAULT"));
 }
