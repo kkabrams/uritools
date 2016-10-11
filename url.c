@@ -1,5 +1,7 @@
 #include <netdb.h>
+#include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
  schemes are case sensitive but cononicals are lower case.
