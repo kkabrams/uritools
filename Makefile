@@ -2,10 +2,11 @@ CFLAGS=-std=c99 -pedantic -Wall
 PREFIX=/usr/local
 CC=gcc
 
-matchurl: matchurl.c
-cuturl: cuturl.c
+all: cuturl matchurl
 
-all: matchurl cuturl
+matchurl: matchurl.c url.o
+
+cuturl: cuturl.c url.o
 
 clean:
 	rm -f matchurl
