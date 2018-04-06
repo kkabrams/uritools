@@ -1,0 +1,5 @@
+#!/bin/sh
+cutargs="$(printf "%s\n" "$1" | tr '%' '\n' | tail -n+2 | sed 's/^\(.\).*/-\1/g')"
+printfargs="$(printf "%s\n" "$1" | sed 's/%./%s/g')"
+#printf "printfargs: %s\n" "$printfargs" 
+cuturl $cutargs | tr '\n' ' ' | xargs -L1 printf "$printfargs"

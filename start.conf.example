@@ -1,0 +1,2 @@
+finger:printf "%p\n" | ncat "%d" 79 | tr -d '\r' | xmessage -file -
+http:dillo %U
