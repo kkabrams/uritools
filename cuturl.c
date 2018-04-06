@@ -32,14 +32,16 @@
 #define F_PATH 1<<5
 #define F_QUERY_STRING 1<<6
 #define F_FRAGMENT_ID 1<<7
+#define F_WHOLE_URL 1<<8
 
-char *long_opts[]={"scheme","username","password","domain","port","path","query_string","fragment_id",0};
-char *short_opts[]={"s","u","k","d","P","p","q","f"};
+char *long_opts[]={"scheme","username","password","domain","port","path","query_string","fragment_id","URL",0};
+char *short_opts[]={"s","u","k","d","P","p","q","f","U"};
 
 int main(int argc,char *argv[]) {
+ char *url;
  char *name[2];
  char *line=0;
- char args[256];
+ short args[256];//this needs to be a short to make room for the F_WHOLE_URL
  int i,j,c=0;
  int size=1024;
  int status;
@@ -118,6 +120,7 @@ int main(int argc,char *argv[]) {
   for(i=0;line[i] && line[i] != '\n' && line[i] != '\r';i++);
   line[i]=0;
 
+  url=strdup(line);
   urlfromline(&u,line);
 
   // printf("scheme://username:password@domain:port/path?query_string#fragment_id\n\n");
@@ -172,6 +175,7 @@ int main(int argc,char *argv[]) {
      if(args[i]&F_PATH) printf("%s\n",AorB(u.path,""));
      if(args[i]&F_QUERY_STRING) printf("%s\n",AorB(u.query_string,""));
      if(args[i]&F_FRAGMENT_ID) printf("%s\n",AorB(u.fragment_id,""));
+     if(args[i]&F_WHOLE_URL) printf("%s\n",url);
     }
    } else {
     printf("scheme: %s\n",u.scheme);
@@ -182,8 +186,10 @@ int main(int argc,char *argv[]) {
     printf("path: %s\n",u.path);
     printf("query_string: %s\n",u.query_string);
     printf("fragment_id: %s\n",u.fragment_id);
+    printf("whole_url: %s\n",url);
    }
   }
+  free(url);//this is definitely malloc()d
   if(malloced) {
    free(line);
    malloced=0;
