@@ -1,5 +1,5 @@
 #!/bin/sh
-cutargs="$(printf "%s\n" "$1" | tr '%' '\n' | tail -n+2 | sed 's/^\(.\).*/-\1/g')"
-printfargs="$(printf "%s\n" "$1" | sed 's/%./%s/g')"
-#printf "printfargs: %s\n" "$printfargs" 
-cuturl $cutargs | tr '\n' ' ' | xargs -L1 printf "$printfargs"
+cutargs="$(printf "%s\n" "$1" | tr '%' '\n' | tail -n+2 | grep '^[sukdPpqfU]' | sed 's/^\(.\).*/-\1/g')"
+count="$(echo $cutargs | tr '-' '\n' | grep -c .)"
+printfargs="$(printf "%s\n" "$1" | sed 's/%[sukdPpqfU]/%s/g')"
+cuturl "$cutargs" | tr '\n' '\0' | xargs -n $count -0 printf "$printfargs"
