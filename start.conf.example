@@ -1,3 +1,8 @@
-finger:printf "%p\n" | ncat "%d" 79 | tr -d '\r' | xmessage -file -
-http:dillo %U
-DEFAULT:xdg-open %U
+### start single-quote escapes the url parts so place them inside single-quote or else!
+### (if you're given a bad link someone might be able to run shell commands)
+finger:printf "%%s\r\n" '%p' | ncat '%d' 79 | tr -d '\r' | xmessage -file -
+### new! subshells works
+whois:whois "$(printf '%%s\\\\n' '%d' | sed 's/^..*$/-h/')" '%d' '%p' | xmessage -file -
+irc:x-terminal-emulator -e irssi -c '%d' -p '%P'
+http:dillo '%U'
+DEFAULT:xdg-open '%U'
