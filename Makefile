@@ -1,5 +1,5 @@
 CFLAGS=-std=c99 -pedantic -Wall
-#PREFIX=/usr/local
+PREFIX=/usr/local
 CC=gcc
 
 all: cuturl matchurl
