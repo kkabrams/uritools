@@ -32,11 +32,16 @@ struct url {
 
 void urlfromline(struct url *u,char *line) {
  int i;
+ char hack=0;//we need to allow for // as host//path separator
   //split at first single / into line and path
+  //this fails to split scheme://host//path into: scheme, host, /path. needs to be first single / or second double-or-more-/
   for(i=0;line[i];i++) {
    if(line[i] == '/' && line[i+1] == '/') {
-    i++;
-    continue;
+    if(!hack) {//only skip out on the first // because it is probably used in the scheme.
+     hack=1;
+     i++;
+     continue;
+    }
    }
    if(line[i] == '/') {
     line[i]=0;
@@ -143,7 +148,7 @@ void magic_and_defaults(struct url *u) {
   serv=getservbyname(u->scheme,strcmp(u->scheme,"udp")?"tcp":"udp");//gets default port for the scheme. http -> 80
   if(serv) snprintf(sport,sizeof(sport)-1,"%d",ntohs(serv->s_port));
 //  else snprintf(sport,sizeof(sport)-1,"%d",serv);
-  u->port=AorB(u->port,AorB(getenv("URL_PORT"),(serv||1?strdup(sport):"DEFAULT")));
+  u->port=AorB(u->port,AorB(getenv("URL_PORT"),(serv?strdup(sport):"DEFAULT")));
 
 //  if(!strcmp(u->port,"DEFAULT")) {
    //this shouldn't happen most of the time. :/
