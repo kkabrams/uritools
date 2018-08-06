@@ -114,6 +114,23 @@ void urlfromline(struct url *u,char *line) {
     }
    }
   }
+  if(u->port) {
+   for(i=0;u->port[i];i++) {
+    if(u->port[i] < '0' || u->port[i] > '9') {
+     //this port number isn't a number!
+     //it is probably a different portion of the url then... and the domain is probably the scheme.
+     if(u->domain && !u->scheme) {
+      u->scheme=u->domain;
+      u->domain=0;
+     }
+     if(!u->path) {
+      u->path=u->port;
+      u->port=0;
+     }
+     break;
+    }
+   }
+  }
 
   if(u->domain) {//for magnet links.
    if(strchr(u->domain,'?')) {
@@ -123,10 +140,12 @@ void urlfromline(struct url *u,char *line) {
    }
   }
 
-  if(strchr(u->domain,':') && !strchr(u->domain,']')) {//for scheme:?query_string
-   u->scheme=u->domain;
-   *strchr(u->scheme,':')=0;
-   u->domain=0;
+  if(u->domain) {
+   if(strchr(u->domain,':') && !strchr(u->domain,']')) {//for scheme:?query_string
+    u->scheme=u->domain;
+    *strchr(u->scheme,':')=0;
+    u->domain=0;
+   }
   }
 
   if(!u->scheme && u->username) {//for mailto:
