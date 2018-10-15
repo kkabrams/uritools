@@ -6,6 +6,86 @@
 #include <string.h>
 #include <stdlib.h>
 
+//reserved = gen-delims / sub-delims
+#define pe_gen_delims ":/?#[]@"
+#define pe_sub_delims "!$&'()*+,;="
+//char *pe_reserved[]=pe_gen_delims "" pe_sub_delims; 
+#define pe_ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define pe_DIGIT "0123456789"
+#define pe_HPUT "-._~"
+//char *pe_unreserved[]=pe_ALPHA "" pe_DIGIT "" pe_HPUT;
+
+unsigned char rfc3086_percent_encoding[256];
+
+#define isxdigit(a) ((a >= 'a' && a <= 'f') || (a >= '0' && a <= '9') || (a >= 'A' && a <= 'F'))
+#define toupper(a) ((a >= 'a' && a <= 'z')?a-' ':a)
+
+char *reserved={
+  pe_gen_delims
+  pe_sub_delims
+  pe_ALPHA
+  pe_DIGIT
+  pe_HPUT
+};
+
+int urlescapelength(char *in,int len) {
+  int rlen=0;//be sure to add one to this return value if you plan on putting a null byte at the end.
+  int i;
+  for(i=0;i<len;i++) {
+    rlen+=strchr(reserved,in[i])?1:3;
+  }
+  return rlen;
+}
+
+// make sure your out char * has enough space! use urlescapelength for it.
+void urlescape(char *in,char *out,int len) {
+  int i;
+  int j;
+  for(i=0,j=0;i<len;i++) {
+    if(strchr(reserved,in[i])) {
+      out[j]=in[i];
+      j++;
+    } else {
+      out[j]='%';
+      j++;
+      out[j]="0123456789ABCDEF"[(in[i] >> 4 & 0x15)];
+      j++;
+      out[j]="0123456789ABCDEF"[(in[i] % 16)];
+      j++;
+    }
+  }
+}
+
+int urlunescape(char *in,char *out) {
+ char *o=out;
+ char *t;
+ char a,b;
+ char *s=in;
+ if(!strchr(s,'%')) memmove(out,in,strlen(in));
+ while((t=strchr(s,'%'))) {
+  if(t-s) {//if there are actually bytes to copy.
+   memmove(o,s,t-s);
+   o+=(t-s);
+   s+=(t-s);
+  }
+  if(isxdigit(t[1]) && isxdigit(t[2])) {
+   s+=3;//skip the %XX
+   a=toupper(t[1]);
+   b=toupper(t[2]);
+   *o=((a-'0'<10 ? a-'0' : a-'A'+10) << 4) + (b-'0'<10 ? b-'0' : b-'A'+10); 
+   o++;
+  } else {
+   s++;//skip just the %. the next character might be a % //TODO: look up what the "right" thing to do here is.
+   *o='%';
+   o++;
+  }
+ }
+ //copy the last part.
+ memmove(o,s,strlen(s));
+ o[strlen(s)]=0;
+ return o+strlen(s)-out;
+}
+
 struct url {
  char *scheme;
  char *username;
