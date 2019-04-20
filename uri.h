@@ -1,7 +1,7 @@
 #ifndef uri_H
 #define uri_H
 
-#define _XOPEN_SOURCE 500 //for strdup
+//#define _XOPEN_SOURCE 500 //for strdup
 #include <string.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -211,8 +211,10 @@ int urifromline(struct uri *u,char *line) {
     //if there wasn't a /, it points at a null byte. so "empty"
     u->username=line+1;
   } else {
-    //we have all we need.
-    return 1;
+    //we're an authority section without a // I guess.
+    //or we're a path
+    if(u->scheme) u->path=line;
+    else u->username=line;//if we have a scheme we're not a //-less authority
   }
 
   if(u->username) {//this contains all of the authority.

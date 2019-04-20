@@ -1,8 +1,9 @@
+#define _XOPEN_SOURCE 500
+#include <string.h>
 #include "uri.h"
 
 #include <netdb.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
