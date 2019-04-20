@@ -1,3 +1,5 @@
+#include "uri.h"
+
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
@@ -5,10 +7,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/wait.h>
-
-#include "url.h"
-
-#define MAGIC
 
 /*
  schemes are case sensitive but cononicals are lower case.
@@ -32,32 +30,30 @@
 #define F_PATH 1<<5
 #define F_QUERY_STRING 1<<6
 #define F_FRAGMENT_ID 1<<7
-#define F_WHOLE_URL 1<<8
+#define F_WHOLE_URI 1<<8
 
-char *long_opts[]={"scheme","username","password","domain","port","path","query_string","fragment_id","URL",0};
+char *long_opts[]={"scheme","username","password","domain","port","path","query_string","fragment_id","URI",0};
 char *short_opts[]={"s","u","k","d","P","p","q","f","U"};
 
 int main(int argc,char *argv[]) {
- char *url;
- char *name[2];
+ char *uri;
  char *line=0;
- short args[256];//this needs to be a short to make room for the F_WHOLE_URL
+ short args[256];//this needs to be a short to make room for the F_WHOLE_URI
  int i,j,c=0;
  int size=1024;
- int status;
  char fixme=0;
  char using_stdin=1;
  char malloced=0;
- struct url u;
+ struct uri u;
  if(argc > 1) {
   if(!strcmp(argv[1],"--help") || !strcmp(argv[1],"-h")) {
-   printf("usage: echo urls | cuturl [options]\n");
-   printf("usage: cuturl [options] url [options] [url]\n\n");
+   printf("usage: echo uris | uricut [options]\n");
+   printf("usage: uricut [options] uri [options] [uri]\n\n");
    printf("options: \n");
    for(i=0;long_opts[i];i++) {
     printf("        -%s|--%s\n",short_opts[i],long_opts[i]);
    }
-   printf("To set default values use environment variables like: CUTURL_[OPTION]\n");
+   printf("To set default values use environment variables like: CUTURI_[OPTION]\n");
    return 2;
   }
  }
@@ -120,51 +116,12 @@ int main(int argc,char *argv[]) {
   for(i=0;line[i] && line[i] != '\n' && line[i] != '\r';i++);
   line[i]=0;
 
-  url=strdup(line);
-  urlfromline(&u,line);
+  uri=strdup(line);
+  urifromline(&u,line);
 
   // printf("scheme://username:password@domain:port/path?query_string#fragment_id\n\n");
   //let's set them to what'll get printed now...
 
-#ifdef MAGIC
-  magic_and_defaults(&u);
-/*
-  u.scheme=AorB(u.scheme,AorB(getenv("CUTURL_SCHEME"),"DEFAULT"));
-  u.username=AorB(u.username,AorB(getenv("CUTURL_USERNAME"),"DEFAULT"));
-  u.password=AorB(u.password,AorB(getenv("CUTURL_PASSWORD"),"DEFAULT"));
-  u.domain=AorB(u.domain,AorB(getenv("CURURL_DOMAIN"),"DEFAULT"));
-  serv=getservbyname(u.scheme,strcmp(u.scheme,"udp")?"tcp":"udp");//gets default port for the scheme. http -> 80
-  if(serv) snprintf(sport,sizeof(sport)-1,"%d",ntohs(serv->s_port));
-  u.port=AorB(u.port,AorB(getenv("CUTURL_PORT"),(serv?sport:"DEFAULT")));
-  u.path=AorB(u.path,AorB(getenv("CUTURL_PATH"),"DEFAULT"));
-  u.query_string=AorB(u.query_string,AorB(getenv("CUTURL_QUERY_STRING"),"DEFAULT"));
-  u.fragment_id=AorB(u.fragment_id,AorB(getenv("CUTURL_FRAGMENT_ID"),"DEFAULT"));
-*/
-#endif
-
-  if((name[0]=getenv("CUTURL__"))) {
-   setenv("CUTURL__SCHEME",u.scheme,1);
-   setenv("CUTURL__USERNAME",u.username,1);
-   setenv("CUTURL__PASSWORD",u.password,1);
-   setenv("CUTURL__DOMAIN",u.domain,1);
-   setenv("CUTURL__PORT",u.port,1);
-   setenv("CUTURL__PATH",u.path,1);
-   setenv("CUTURL__QUERY_STRING",u.query_string,1);
-   setenv("CUTURL__FRAGMENT_ID",u.fragment_id,1);
-   name[1]=0;
-   switch(fork()) {
-    case 0:
-     execv(name[0],name);
-     perror("execv");
-     return errno;
-    case -1:
-     perror("fork");
-     return errno;
-    default:
-     break;
-   }
-   wait(&status);
-  } else {
    if(c) {
     for(i=0;i<c;i++) {
      if(args[i]&F_SCHEME) printf("%s\n",AorB(u.scheme,""));
@@ -175,7 +132,7 @@ int main(int argc,char *argv[]) {
      if(args[i]&F_PATH) printf("%s\n",AorB(u.path,""));
      if(args[i]&F_QUERY_STRING) printf("%s\n",AorB(u.query_string,""));
      if(args[i]&F_FRAGMENT_ID) printf("%s\n",AorB(u.fragment_id,""));
-     if(args[i]&F_WHOLE_URL) printf("%s\n",url);
+     if(args[i]&F_WHOLE_URI) printf("%s\n",uri);
     }
    } else {
     printf("scheme: %s\n",u.scheme);
@@ -186,10 +143,9 @@ int main(int argc,char *argv[]) {
     printf("path: %s\n",u.path);
     printf("query_string: %s\n",u.query_string);
     printf("fragment_id: %s\n",u.fragment_id);
-    printf("whole_url: %s\n",url);
+    printf("whole_uri: %s\n",uri);
    }
-  }
-  free(url);//this is definitely malloc()d
+  free(uri);//this is definitely malloc()d
   if(malloced) {
    free(line);
    malloced=0;

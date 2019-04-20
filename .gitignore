@@ -1,2 +1,5 @@
-matchurl
-cuturl
+uricmp
+uricut
+uriescape
+urimatch
+uriunescape

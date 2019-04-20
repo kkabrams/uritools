@@ -2,4 +2,4 @@
 cutargs="$(printf "%s\n" "$1" | sed 's/%[^sukdPpqfU]//g' | tr '%' '\n' | tail -n+2 | sed 's/^\(.\).*/-\1/g' | tr '\n' ' ')"
 count="$(echo $cutargs | tr '-' '\n' | grep -c .)"
 printfargs="$(printf "%s\n" "$1" | sed 's/%[sukdPpqfU]/%s/g')"
-cuturl "$cutargs" | tr '\n' '\0' | xargs -n $count -0 printf "$printfargs"
+uricut "$cutargs" | tr '\n' '\0' | xargs -n $count -0 printf "$printfargs"

@@ -1,0 +1,4 @@
+#!/bin/sh
+scheme="$(printf "%s\n" "$1" | uricut -s)"
+line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
+eval "$(printf "%s\n" "$1" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"

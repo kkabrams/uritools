@@ -1,4 +1,0 @@
-#!/bin/sh
-scheme="$(printf "%s\n" "$1" | cuturl -s)"
-line="$(grep "^${scheme}:" ~/.config/start.conf | cut -d: -f2-)"
-eval "$(printf "%s\n" "$1" | sed 's/'\''/'\''\\'\'''\''/g' | printfurl "$line")"
