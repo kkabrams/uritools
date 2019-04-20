@@ -110,6 +110,7 @@ int main(int argc,char *argv[]) {
    line=malloc(size+1);
    malloced=1;
    if(!fgets(line,size,stdin)) {
+    free(line);
     return 0;
    }
   }
