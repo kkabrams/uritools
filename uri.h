@@ -120,6 +120,56 @@ unsigned int uricmp(struct uri *a,struct uri *b) {
   return ret;
 }
 
+char *linefromuri(struct uri *u) {
+  char *line=malloc(2048);//fuck if I know
+  strcpy(line,"");
+  if(u->scheme) {
+    strcat(line,u->scheme);
+  }
+  if(u->scheme && u->domain) {
+    strcat(line,"://");
+  }
+  if(u->scheme && !u->domain) {
+    strcat(line,":");
+  }
+  if(u->username && u->domain) {
+    strcat(line,u->username);
+  }
+  if(u->password && u->username && u->domain) {//we /should/ only have a password if there's a username AND domain
+    strcat(line,":");
+    strcat(line,u->password);
+  }
+  if(u->username && u->domain) {
+    strcat(line,"@");
+  }
+  if(u->domain) {
+    strcat(line,u->domain);
+  }
+  if(u->port && u->domain) { //port only makes sense if there's a domain
+    strcat(line,":");
+    strcat(line,u->port);
+  }
+  if(u->path && u->scheme && !u->domain) {
+    strcat(line,u->path);
+  }
+  if(u->path && u->scheme && u->domain) {
+    if(*u->path != '/') {
+      strcat(line,"/");
+    }
+    strcat(line,u->path);
+    //path must start with / if we have domain.
+  }
+  if(u->query_string) {
+    strcat(line,"?");
+    strcat(line,u->query_string);
+  }
+  if(u->fragment_id) {
+    strcat(line,"#");
+    strcat(line,u->fragment_id);
+  }
+  return line;
+}
+
 /*
  schemes are case sensitive but cononicals are lower case.
  domain is case insensitive. return it lowercased?
