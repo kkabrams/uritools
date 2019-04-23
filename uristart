@@ -1,4 +1,49 @@
-#!/bin/sh
-scheme="$(printf "%s\n" "$1" | uricut -s)"
-line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
-eval "$(printf "%s\n" "$1" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
+#!/bin/bash
+##might have to configure me.
+ASKUSER="dmenu -p"
+uri=$1
+scheme="$(printf "%s\n" "$uri" | uricut -s)"
+if grep '\+' <<< "$scheme" 2>&1 >/dev/null;then
+  echo "dunno wtf yet"
+  scheme1="$(printf "%s\n" "$scheme" | cut -d+ -f1)+"
+  scheme2="+$(printf "%s\n" "$scheme" | cut -d+ -f2)"
+  echo $scheme1
+  echo $scheme2
+  line1="$(grep "^${scheme1}"$'\t' ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
+  line2="$(grep "^${scheme2}"$'\t' ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
+  echo $line1
+  echo $line2
+  pipeline1="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line1")"
+  pipeline2="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line2")"
+  echo $pipeline1
+  echo $pipeline2
+  socat "exec:bash -c 'eval \"$pipeline1\"'" "exec:bash -c 'eval \"$pipeline2\"'"
+else
+  line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
+  if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
+    proto="$(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1)"
+    if [ ! "$proto" ]; then
+      proto=tcp
+    fi
+    uri="$(cat <(printf "%s\n" "$uri" | uricut) \
+               <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d') 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
+            | urijoin)"
+    printf "srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
+  fi
+  if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have a port
+    uri="$(cat <(printf "%s\n" "$uri" | uricut) \
+               <(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
+            | urijoin)"
+    printf "getent modified uri: %s\n" "$uri" >&2
+  fi
+  echo "the uri we're using: $uri"
+  if [ "$line" = "" ];then
+    line="$(printf "" | $ASKUSER "protocol scheme (${scheme}) not configured yet. enter new pipeline to use:")"
+    if [ "$line" = "" ];then
+      echo "user noped on entering new pipeline" >&2
+      exit 1
+    fi
+    printf '%s:\t%s\n' "${scheme}" "${line}" >> ~/.config/uristart.conf
+  fi
+  eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
+fi
