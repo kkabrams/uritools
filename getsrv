@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+if [ "_$1" = '_-a' ];then
+  head="uniq"
+  shift
+else
+  head="head -n1"
+fi
+record="_$1._$2.$3"
+shift 3
+if [ "_$*" != "_" ];then
+  filter='grep -vF "'"$(printf "%s\n" "$*" | tr ' ' '\n')"'"'
+else
+  filter=cat
+fi
+if which dig >/dev/null;then
+  dig +short -t SRV "$record" 
+  echo "after dig" >&2
+elif which host >/dev/null;then
+  host -t SRV "$record" | cut '-d ' -f5-
+  echo "after host" >&2
+else
+  echo "fuck me. how am I supposed to get a srv record without dig or host?" >&2
+  exit 1
+fi | grep '^[0-9][0-9]* [0-9][0-9]*' \
+  | sort -rn \
+  | rev \
+  | cut -b2- \
+  | rev \
+  | awk '{print $1, $2, $4":"$3}' \
+  | eval "$filter" \
+  | awk '{if(NR==1){D=$1}if(D==$1)print $0}' \
+  | cut '-d ' -f2- \
+  | awk '{for(i=0;i<=$1;i++) {print $0} }' \
+  | cut '-d ' -f2- \
+  | shuf \
+  | head -n1 \
