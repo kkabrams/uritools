@@ -2,11 +2,13 @@ CFLAGS:=-std=c11 -pedantic -Wall
 PREFIX:=/usr/local
 CC:=gcc
 
-all: uricut urimatch uriunescape uriescape uricmp
+all: urimatch uricut urijoin uricmp uriunescape uriescape
 
 urimatch: urimatch.c uri.h
 
 uricut: uricut.c uri.h
+
+urijoin: urijoin.c uri.h
 
 uricmp: uricmp.c uri.h
 
@@ -21,6 +23,7 @@ clean:
 install: all
 	install urimatch $(PREFIX)/bin/urimatch
 	install uricut $(PREFIX)/bin/uricut
+	install urijoin $(PREFIX)/bin/urijoin
 	install uricmp $(PREFIX)/bin/uricmp
 	install uristart $(PREFIX)/bin/uristart
 	install uriprintf $(PREFIX)/bin/uriprintf
