@@ -1,5 +1,9 @@
 #!/bin/sh
 cutargs="$(printf "%s\n" "$1" | sed 's/%[^sukdPpqfU]//g' | tr '%' '\n' | tail -n+2 | sed 's/^\(.\).*/-\1/g' | tr '\n' ' ')"
 count="$(echo $cutargs | tr '-' '\n' | grep -c .)"
-printfargs="$(printf "%s\n" "$1" | sed 's/%[sukdPpqfU]/%s/g')"
-uricut "$cutargs" | tr '\n' '\0' | xargs -n $count -0 printf "$printfargs"
+if [ "$count" = 0 ];then
+  printf "%s\n" "$1"
+else
+  printfargs="$(printf "%s\n" "$1" | sed 's/%[sukdPpqfU]/%s/g')"
+  urlcut "$cutargs" | tr '\n' '\0' | xargs -n $count -0 printf "$printfargs"
+fi
