@@ -137,14 +137,14 @@ int main(int argc,char *argv[]) {
      if(args[i]&F_WHOLE_URI) printf("%s\n",uri);
     }
    } else {
-    printf("scheme: %s\n",u.scheme);
-    printf("username: %s\n",u.username);
-    printf("password: %s\n",u.password);
-    printf("domain: %s\n",u.domain);
-    printf("port: %s\n",u.port);
-    printf("path: %s\n",u.path);
-    printf("query_string: %s\n",u.query_string);
-    printf("fragment_id: %s\n",u.fragment_id);
+    if(u.scheme)       printf("scheme: %s\n",u.scheme);
+    if(u.username)     printf("username: %s\n",u.username);
+    if(u.password)     printf("password: %s\n",u.password);
+    if(u.domain)       printf("domain: %s\n",u.domain);
+    if(u.port)         printf("port: %s\n",u.port);
+    if(u.path)         printf("path: %s\n",u.path);
+    if(u.query_string) printf("query_string: %s\n",u.query_string);
+    if(u.fragment_id)  printf("fragment_id: %s\n",u.fragment_id);
     printf("whole_uri: %s\n",uri);
    }
   free(uri);//this is definitely malloc()d
