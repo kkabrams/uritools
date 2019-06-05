@@ -2,12 +2,10 @@
 #include <string.h>
 #include "uri.h"
 
-#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
-#include <sys/wait.h>
 
 /*
  schemes are case sensitive but cononicals are lower case.

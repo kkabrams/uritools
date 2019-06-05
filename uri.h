@@ -3,7 +3,6 @@
 
 //#define _XOPEN_SOURCE 500 //for strdup
 #include <string.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 
