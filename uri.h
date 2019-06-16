@@ -61,7 +61,6 @@ int uriunescape(char *in,char *out) {
  char *t;
  char a,b;
  char *s=in;
- if(!strchr(s,'%')) memmove(out,in,strlen(in));
  while((t=strchr(s,'%'))) {
   if(t-s) {//if there are actually bytes to copy.
    memmove(o,s,t-s);
@@ -72,7 +71,7 @@ int uriunescape(char *in,char *out) {
    s+=3;//skip the %XX
    a=toupper(t[1]);
    b=toupper(t[2]);
-   *o=((a-'0'<10 ? a-'0' : a-'A'+10) << 4) + (b-'0'<10 ? b-'0' : b-'A'+10); 
+   *o=((a-'0'<10 ? a-'0' : a-'A'+10) << 4) + (b-'0'<10 ? b-'0' : b-'A'+10);
    o++;
   } else {
    s++;//skip just the %. the next character might be a % //TODO: look up what the "right" thing to do here is.
