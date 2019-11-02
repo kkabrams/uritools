@@ -1,24 +1,26 @@
 #!/bin/bash
 ##might have to configure me.
 ASKUSER="dmenu -p"
-uri=$1
+uri="${1}"
 scheme="$(printf "%s\n" "$uri" | uricut -s)"
-if grep '\+' <<< "$scheme" 2>&1 >/dev/null;then
-  echo "dunno wtf yet"
-  scheme1="$(printf "%s\n" "$scheme" | cut -d+ -f1)+"
-  scheme2="+$(printf "%s\n" "$scheme" | cut -d+ -f2)"
-  echo $scheme1
-  echo $scheme2
-  line1="$(grep "^${scheme1}"$'\t' ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
-  line2="$(grep "^${scheme2}"$'\t' ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
-  echo $line1
-  echo $line2
-  pipeline1="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line1")"
-  pipeline2="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line2")"
-  echo $pipeline1
-  echo $pipeline2
-  socat "exec:bash -c 'eval \"$pipeline1\"'" "exec:bash -c 'eval \"$pipeline2\"'"
-else
+### experimental crap.. let's comment it out for now.
+#if grep '\+' <<< "$scheme" 2>&1 >/dev/null;then
+#  echo "dunno wtf yet"
+#  scheme1="$(printf "%s\n" "$scheme" | cut -d+ -f1)+"
+#  scheme2="+$(printf "%s\n" "$scheme" | cut -d+ -f2)"
+#  echo $scheme1
+#  echo $scheme2
+#  line1="$(grep "^${scheme1}:"$'\t' ~/.config/uristart.conf | tr -s '\t ' | cut -f2- | sed 's/^[ \t]//g' | sed 's/\\n/\\\\n/g')"
+#  line2="$(grep "^${scheme2}:"$'\t' ~/.config/uristart.conf | tr -s '\t ' | cut -f2- | sed 's/^[ \t]//g' | sed 's/\\n/\\\\n/g')"
+#  echo $line1
+#  echo $line2
+#  pipeline1="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line1" )"
+#  pipeline2="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line2" )"
+#  echo "$pipeline1"
+#  echo "$pipeline2"
+#  mknod /tmp/p p
+#  cat /tmp/p | bash -xc "$pipeline1" | bash -xc "$pipeline2" > /tmp/p
+#else
   line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
   if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
     proto="$(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1)"
@@ -45,5 +47,10 @@ else
     fi
     printf '%s:\t%s\n' "${scheme}" "${line}" >> ~/.config/uristart.conf
   fi
+  ## uri *might* contain pattern matching special characters. :/
+  ## which could break things in weird and exciting ways
+  if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
+    printf "%s\n" "$uri" >> ~/.cache/uristart.log
+  fi
   eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
-fi
+#fi

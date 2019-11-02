@@ -1,0 +1,3 @@
+#!/bin/sh
+#uristart.log /should/ already be uniq'd because of uristart's code now, but might as well not rely on it.
+uristart $(cat ~/.cache/uristart.log | sort | uniq | dmenu -p url\> | cut '-d ' -f1)
