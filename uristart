@@ -1,4 +1,7 @@
 #!/bin/bash
+### arguments:
+# $1: the URI we're starting
+# $2: the "referer" of the URI we're starting.
 ##might have to configure me.
 ASKUSER="dmenu -p"
 uri="${1}"
@@ -50,7 +53,11 @@ scheme="$(printf "%s\n" "$uri" | uricut -s)"
   ## uri *might* contain pattern matching special characters. :/
   ## which could break things in weird and exciting ways
   if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
-    printf "%s\n" "$uri" >> ~/.cache/uristart.log
+    if [ "$2" ];then
+      printf "%s %s\n" "$uri" "$2" >> ~/.cache/uristart.log
+    else
+      printf "%s\n" "$uri" >> ~/.cache/uristart.log
+    fi
   fi
   eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
 #fi
