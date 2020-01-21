@@ -1,0 +1,2 @@
+#!/bin/sh
+uristart "search:?q=$(echo | dmenu -p 'search>' | tr '\n' '\0' | xargs -0 uriescape | sed 's/&/%26/g;s/#/%23/g')"
