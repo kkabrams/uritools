@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int main(int argc,char *argv[]) {
-  int i;
+  int i,j;
   int len;
 
   char doh[2];
@@ -31,7 +31,7 @@ int main(int argc,char *argv[]) {
       write(1,buf2,len);
      //we end with a %[single char]
       buf[0]='%';
-      buf[1]=doh;
+      buf[1]=doh[0];
      }
     }
     if(!hack) {//we're good.
