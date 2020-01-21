@@ -28,7 +28,7 @@ char *uri_reserved={
   pe_HPUT
 };
 
-int uriescapelength(char *in,int len) {
+int uriescapelength(unsigned char *in,int len) {
   int rlen=0;//be sure to add one to this return value if you plan on putting a null byte at the end.
   int i;
   for(i=0;i<len;i++) {
@@ -38,7 +38,7 @@ int uriescapelength(char *in,int len) {
 }
 
 // make sure your out char * has enough space! use uriescapelength for it.
-void uriescape(unsigned char *in,char *out,int len) {
+void uriescape(unsigned char *in,unsigned char *out,int len) {
   int i;
   int j;
   for(i=0,j=0;i<len;i++) {
