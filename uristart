@@ -2,62 +2,55 @@
 ### arguments:
 # $1: the URI we're starting
 # $2: the "referer" of the URI we're starting.
+### requirements:
+# getsrv, urimatch, urijoin, uricut, some-way-to-ask-the-user-for-a-line (dmenu by default)
+# getsrv tries dig and host, you only need one or the other.
 ##might have to configure me.
 ASKUSER="dmenu -p"
+
 uri="${1}"
 scheme="$(printf "%s\n" "$uri" | uricut -s)"
-### experimental crap.. let's comment it out for now.
-#if grep '\+' <<< "$scheme" 2>&1 >/dev/null;then
-#  echo "dunno wtf yet"
-#  scheme1="$(printf "%s\n" "$scheme" | cut -d+ -f1)+"
-#  scheme2="+$(printf "%s\n" "$scheme" | cut -d+ -f2)"
-#  echo $scheme1
-#  echo $scheme2
-#  line1="$(grep "^${scheme1}:"$'\t' ~/.config/uristart.conf | tr -s '\t ' | cut -f2- | sed 's/^[ \t]//g' | sed 's/\\n/\\\\n/g')"
-#  line2="$(grep "^${scheme2}:"$'\t' ~/.config/uristart.conf | tr -s '\t ' | cut -f2- | sed 's/^[ \t]//g' | sed 's/\\n/\\\\n/g')"
-#  echo $line1
-#  echo $line2
-#  pipeline1="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line1" )"
-#  pipeline2="$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line2" )"
-#  echo "$pipeline1"
-#  echo "$pipeline2"
-#  mknod /tmp/p p
-#  cat /tmp/p | bash -xc "$pipeline1" | bash -xc "$pipeline2" > /tmp/p
-#else
-  line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g')"
-  if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
-    proto="$(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1)"
-    if [ ! "$proto" ]; then
-      proto=tcp
-    fi
-    uri="$(cat <(printf "%s\n" "$uri" | uricut) \
-               <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d') 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
-            | urijoin)"
-    printf "srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
+line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g' | sed 's/\\/\\\\/g')"
+
+### if we do not have a port, we are going to try to get it from their srv records.
+if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
+  proto="$(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1)"
+  if [ ! "$proto" ]; then
+    proto=tcp
   fi
-  if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have a port
-    uri="$(cat <(printf "%s\n" "$uri" | uricut) \
-               <(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
-            | urijoin)"
-    printf "getent modified uri: %s\n" "$uri" >&2
-  fi
-  echo "the uri we're using: $uri"
+  uri="$(cat <(printf "%s\n" "$uri" | uricut) \
+             <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d') 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
+          | urijoin)"
+  printf "srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
+fi
+
+### if they do not have srv records, fall-back to /etc/services
+if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have a port
+  uri="$(cat <(printf "%s\n" "$uri" | uricut) \
+             <(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
+          | urijoin)"
+  printf "getent modified uri: %s\n" "$uri" >&2
+fi
+
+### ask the user for a pipeline for starting these URIs if there isn't a pipeline already in the config.
+echo "the uri we're using: $uri"
+if [ "$line" = "" ];then
+  line="$(printf "" | $ASKUSER "protocol scheme (${scheme}) not configured yet. enter new pipeline to use:")"
   if [ "$line" = "" ];then
-    line="$(printf "" | $ASKUSER "protocol scheme (${scheme}) not configured yet. enter new pipeline to use:")"
-    if [ "$line" = "" ];then
-      echo "user noped on entering new pipeline" >&2
-      exit 1
-    fi
-    printf '%s:\t%s\n' "${scheme}" "${line}" >> ~/.config/uristart.conf
+    echo "user noped on entering new pipeline" >&2
+    exit 1
   fi
-  ## uri *might* contain pattern matching special characters. :/
-  ## which could break things in weird and exciting ways
-  if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
-    if [ "$2" ];then
-      printf "%s %s\n" "$uri" "$2" >> ~/.cache/uristart.log
-    else
-      printf "%s\n" "$uri" >> ~/.cache/uristart.log
-    fi
+  printf '%s:\t%s\n' "${scheme}" "${line}" >> ~/.config/uristart.conf
+fi
+
+### log the uri if it isn't logged already.
+if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
+  if [ "$2" ];then
+    printf "%s %s\n" "$uri" "$2" >> ~/.cache/uristart.log
+  else
+    printf "%s\n" "$uri" >> ~/.cache/uristart.log
   fi
-  eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
-#fi
+fi
+
+### do the magic
+eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
