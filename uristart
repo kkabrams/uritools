@@ -8,9 +8,16 @@
 ##might have to configure me.
 ASKUSER="dmenu -p"
 
+if [ "$1" = "--check" ];then
+  check=1
+  shift
+else
+  check=0
+fi
+
 uri="${1}"
 scheme="$(printf "%s\n" "$uri" | uricut -s)"
-line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]//g' | sed 's/\\/\\\\/g')"
+line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
 
 ### if we do not have a port, we are going to try to get it from their srv records.
 if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
@@ -33,7 +40,7 @@ if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have 
 fi
 
 ### ask the user for a pipeline for starting these URIs if there isn't a pipeline already in the config.
-echo "the uri we're using: $uri"
+echo "the uri we're using: $uri" >&2
 if [ "$line" = "" ];then
   line="$(printf "" | $ASKUSER "protocol scheme (${scheme}) not configured yet. enter new pipeline to use:")"
   if [ "$line" = "" ];then
@@ -53,4 +60,8 @@ if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then 
 fi
 
 ### do the magic
-eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
+if [ "$check" ];then
+  printf "%s\n" "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
+else
+  eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
+fi
