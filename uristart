@@ -9,10 +9,10 @@
 ASKUSER="dmenu -p"
 
 if [ "$1" = "--check" ];then
-  check=1
+  check=check
   shift
 else
-  check=0
+  check=dont
 fi
 
 uri="${1}"
@@ -60,7 +60,7 @@ if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then 
 fi
 
 ### do the magic
-if [ "$check" ];then
+if [ "$check" = "check" ];then
   printf "%s\n" "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
 else
   eval "$(printf "%s\n" "$uri" | sed 's/'\''/'\''\\'\'''\''/g' | uriprintf "$line")"
