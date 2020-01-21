@@ -38,7 +38,7 @@ int uriescapelength(char *in,int len) {
 }
 
 // make sure your out char * has enough space! use uriescapelength for it.
-void uriescape(char *in,char *out,int len) {
+void uriescape(unsigned char *in,char *out,int len) {
   int i;
   int j;
   for(i=0,j=0;i<len;i++) {
@@ -48,7 +48,7 @@ void uriescape(char *in,char *out,int len) {
     } else {
       out[j]='%';
       j++;
-      out[j]="0123456789ABCDEF"[(in[i] >> 4 & 0x15)];
+      out[j]="0123456789ABCDEF"[((in[i] >> 4) % 16)];
       j++;
       out[j]="0123456789ABCDEF"[(in[i] % 16)];
       j++;
