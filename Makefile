@@ -29,3 +29,4 @@ install: all
 	install uriprintf $(PREFIX)/bin/uriprintf
 	install uriunescape $(PREFIX)/bin/uriunescape
 	install uriescape $(PREFIX)/bin/uriescape
+	install urilaunch $(PREFIX)/bin/urilaunch
