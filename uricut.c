@@ -40,6 +40,7 @@ int main(int argc,char *argv[]) {
  short args[256];//this needs to be a short to make room for the F_WHOLE_URI
  int i,j,c=0;
  int size=1024;
+ char at_least_one=0;
  char fixme=0;
  char using_stdin=1;
  char malloced=0;
@@ -135,6 +136,7 @@ int main(int argc,char *argv[]) {
      if(args[i]&F_WHOLE_URI) printf("%s\n",uri);
     }
    } else {
+    if(at_least_one)   printf("\n");
     if(u.scheme)       printf("scheme: %s\n",u.scheme);
     if(u.username)     printf("username: %s\n",u.username);
     if(u.password)     printf("password: %s\n",u.password);
@@ -144,6 +146,7 @@ int main(int argc,char *argv[]) {
     if(u.query_string) printf("query_string: %s\n",u.query_string);
     if(u.fragment_id)  printf("fragment_id: %s\n",u.fragment_id);
     printf("whole_uri: %s\n",uri);
+    at_least_one=1;
    }
   free(uri);//this is definitely malloc()d
   if(malloced) {
