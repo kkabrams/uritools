@@ -2,43 +2,42 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#define BUFSIZE 4096
+
 int main(int argc,char *argv[]) {
-  int i,j;
+  int i=0,j=0;
   int len;
-
-  char doh[2];
-  int hack=0;
-
-  char buf[16];
-  char buf2[16];
+  char buf[BUFSIZE];
+  char buf2[BUFSIZE];
+  int blen;
+  int hack;
   if(argc > 1) {
-   for(argv++,argc--;argc;argc--,argv++) {
-    len=uriunescape(*argv,*argv);
-    write(1,*argv,len);
-    if(argc-1) write(1," ",1);
-   }
+    for(argv++,argc--;argc;argc--,argv++) {
+      len=uriunescape(*argv,*argv);
+      write(1,*argv,len);
+      if(argc-1) write(1," ",1);
+    }
   } else {
-   while(fgets(buf+hack,sizeof(buf)-1-hack,stdin)) {//this is a bad idea. first chunk could end inside of a sequence we could decode. [first %] [09 second]
-    hack=0;
-    for(i=0;i<2;i++) {//2 being max length of a %XX thing.
-     if(buf[strlen(buf)-1-i] == '%') {
-      for(j=0;j<i;j++) {
-        doh[j] = buf[strlen(buf)-1-j];//save it for when we need to fix it back.
+    while((blen=read(0,buf+hack,BUFSIZE-hack-1)) > 0) {
+      buf[blen+hack]=0;
+      blen=strlen(buf);
+      hack=0;
+      for(i=0;i<2;i++) {//2 being max length of a %XX thing. and we're starting at the last.
+        if(buf[blen-i-1] == '%') {//we're looping from the end first...
+          buf[blen-i-1] = 0;//zero out the %
+          hack=i+1;
+          break;
+        }
       }
-      buf[strlen(buf)-1-i] = 0;//zero out the %
-      hack=2;
-      len=uriunescape(buf,buf2);
+      len=uriunescape(buf,buf2);//uriunescape wants null terminated strings
       write(1,buf2,len);
-     //we end with a %[single char]
-      buf[0]='%';
-      buf[1]=doh[0];
-     }
+      if(hack) {
+        buf[0]='%';
+        for(j=0;j<hack;j++) {//move the entity to the start of the string
+          buf[j+1]=buf[blen-(hack-1-j)];
+        }
+      }
     }
-    if(!hack) {//we're good.
-      len=uriunescape(buf,buf2);
-      write(1,buf2,len);
-    }
-   }
   }
   return 0;
 }
