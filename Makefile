@@ -31,3 +31,4 @@ install: all
 	install uriescape $(PREFIX)/bin/uriescape
 	install urilaunch $(PREFIX)/bin/urilaunch
 	install search $(PREFIX)/bin/search
+	install getsrv $(PREFIX)/bin/getsrv
