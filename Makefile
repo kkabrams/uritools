@@ -32,3 +32,4 @@ install: all
 	install urilaunch $(PREFIX)/bin/urilaunch
 	install search $(PREFIX)/bin/search
 	install getsrv $(PREFIX)/bin/getsrv
+	install urititle $(PREFIX)/bin/urititle
