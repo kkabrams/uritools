@@ -20,8 +20,8 @@ if [ "$port" ];then
   UA="Mozilla/5.0 (impersonator)"
 #  content_type="$(printf "HEAD %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n" "$path" "$domain" "$UA" | ncat -4 $SSL "$domain" "$port" | grep -i '^Content-Type: ' | head -n1 | cut '-d ' -f2 | cut '-d;' -f1 | tr -d '\r\n')"
   a_header="$(curl -Lsi "$1" | egrep -ai '^Location: |^Content-Type: ' | head -n1 | tr -d '\r\n')"
-  if printf "%s\n" "${a_header}" | grep -i^Content-Type: 2>&1 >/dev/null 2>&1;then
-    content_type="$(printf '%s\n' "${a_header}" | cut '-d ' -f2- | cut -d; -f1)"
+  if printf "%s\n" "${a_header}" | grep -i '^Content-Type: ' 2>&1 >/dev/null 2>&1;then
+    content_type="$(printf '%s\n' "${a_header}" | cut '-d ' -f2- | cut '-d;' -f1)"
   else
     content_type="redirect probably"
   fi
