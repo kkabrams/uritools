@@ -33,3 +33,4 @@ install: all
 	install search $(PREFIX)/bin/search
 	install getsrv $(PREFIX)/bin/getsrv
 	install urititle $(PREFIX)/bin/urititle
+	install -t $(PREFIX)/bin copy_start_nevermind.sh
