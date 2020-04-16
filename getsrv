@@ -12,12 +12,12 @@ if [ "_$*" != "_" ];then
 else
   filter=cat
 fi
-if which dig >/dev/null;then
-  dig +short -t SRV "$record" 
-  #echo "after dig" >&2
-elif which host >/dev/null;then
+if which host >/dev/null;then
   host -t SRV "$record" | cut '-d ' -f5-
   #echo "after host" >&2
+elif which dig >/dev/null;then
+  dig +short -t SRV "$record" 
+  #echo "after dig" >&2
 else
   echo "how am I supposed to get a srv record without dig or host? giving up." >&2
   exit 1

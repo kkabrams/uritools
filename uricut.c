@@ -39,7 +39,7 @@ int main(int argc,char *argv[]) {
  char *line=0;
  short args[256];//this needs to be a short to make room for the F_WHOLE_URI
  int i,j,c=0;
- int size=1024;
+ int size=8192;//use this to increase max length of URIs we can read from stdin
  char at_least_one=0;
  char fixme=0;
  char using_stdin=1;
