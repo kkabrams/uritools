@@ -26,7 +26,7 @@ if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
     proto=tcp
   fi
   uri="$(cat <(printf "%s\n" "$uri" | uricut) \
-             <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d') 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
+             <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d' | cut -d+ -f2-) 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
           | urijoin)"
   printf "srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
 fi
