@@ -21,17 +21,18 @@ clean:
 	rm -f *.o
 
 install: all
-	install urimatch $(PREFIX)/bin/urimatch
-	install uricut $(PREFIX)/bin/uricut
-	install urijoin $(PREFIX)/bin/urijoin
-	install uricmp $(PREFIX)/bin/uricmp
-	install uristart $(PREFIX)/bin/uristart
-	install uriprintf $(PREFIX)/bin/uriprintf
-	install uriunescape $(PREFIX)/bin/uriunescape
-	install uriescape $(PREFIX)/bin/uriescape
-	install urilaunch $(PREFIX)/bin/urilaunch
-	install search $(PREFIX)/bin/search
-	install getsrv $(PREFIX)/bin/getsrv
-	install urititle $(PREFIX)/bin/urititle
+	install -t $(PREFIX)/bin urimatch
+	install -t $(PREFIX)/bin uricut
+	install -t $(PREFIX)/bin urijoin
+	install -t $(PREFIX)/bin uricmp
+	install -t $(PREFIX)/bin uristart
+	install -t $(PREFIX)/bin uriprintf
+	install -t $(PREFIX)/bin uriunescape
+	install -t $(PREFIX)/bin uriescape
+	install -t $(PREFIX)/bin urilaunch
+	install -t $(PREFIX)/bin search
+	install -t $(PREFIX)/bin getsrv
+	install -t $(PREFIX)/bin urititle
+	install -t $(PREFIX)/bin urigetline
 	install -t $(PREFIX)/bin copy_start_nevermind.sh
 	install -t $(PREFIX)/bin choose

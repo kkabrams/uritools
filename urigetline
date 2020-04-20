@@ -1,0 +1,25 @@
+#!/bin/bash
+uri="$1"
+### old way.
+# line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
+
+### fancy way.
+cat ~/.config/uristart.conf \
+  | while read -r l;do
+        uritmp="$uri"
+        uritmp="$(printf "%s\n" "$l" \
+          | cut -d: -f1 \
+          | tr ' ' '\n' \
+          | paste '-d ' - - \
+          | while read -r a b;do
+                uritmp="$(printf "%s\n" "${uritmp}" | urimatch "$a" "$b")"
+                printf "%s\n" "$uritmp"
+            done | tail -n1)"
+        if [ "$uritmp" ];then
+                printf '%s\n' "$l"
+                break
+        fi
+    done \
+  | cut -d: -f2- \
+  | sed 's/^[ \t]*//g' \
+  | sed 's/\\/\\\\/g'
