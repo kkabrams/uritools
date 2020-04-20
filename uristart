@@ -17,7 +17,29 @@ fi
 
 uri="${1}"
 scheme="$(printf "%s\n" "$uri" | uricut -s)"
-line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
+#line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
+
+line="$(
+cat ~/.config/uristart.conf \
+  | while read -r l;do
+	uritmp="$uri"
+	uritmp="$(printf "%s\n" "$l" \
+	  | cut -d: -f1 \
+          | tr ' ' '\n' \
+          | paste '-d ' - - \
+          | while read -r a b;do
+		uritmp="$(printf "%s\n" "${uritmp}" | urimatch "$a" "$b")"
+		printf "%s\n" "$uritmp"
+	    done | tail -n1)"
+	if [ "$uritmp" ];then
+		printf '%s\n' "$l"
+		break
+	fi
+    done \
+  | cut -d: -f2- \
+  | sed 's/^[ \t]*//g' \
+  | sed 's/\\/\\\\/g'
+)"
 
 ### if we do not have a port, we are going to try to get it from their srv records.
 if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
