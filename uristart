@@ -22,7 +22,7 @@ line="$(urigetline "$uri")"
 
 ### if we do not have a port, we are going to try to get it from their srv records.
 if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
-  proto="$(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1)"
+  proto="$(grep ^"$scheme"'\s' /etc/services | tr ' ' '\t' | tr -s '\t ' | cut -f2 | cut -d/ -f2 | head -n1)"
   if [ ! "$proto" ]; then
     proto=tcp
   fi
@@ -35,7 +35,7 @@ fi
 ### if they do not have srv records, fall-back to /etc/services
 if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have a port
   uri="$(cat <(printf "%s\n" "$uri" | uricut) \
-             <(grep ^"$scheme"'[\t ]' /etc/services | tr -s '\t ' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
+             <(grep ^"$scheme"'\s' /etc/services | tr ' ' '\t' | tr -s '\t' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
           | urijoin 2>/dev/null)"
   printf "getent modified uri: %s\n" "$uri" >&2
 fi
