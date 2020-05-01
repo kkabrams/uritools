@@ -4,7 +4,7 @@ uri="$1"
 # line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
 
 ### fancy way.
-cat ~/.config/uristart.conf \
+grep '^[^#]' ~/.config/uristart.conf \
   | while read -r l;do
         uritmp="$uri"
         uritmp="$(printf "%s\n" "$l" \
