@@ -1,0 +1,2 @@
+#!/bin/sh
+printf "%s\n" "${QUERY_STRING}" | tr '&' '\n' | grep "^${1}=" | cut -d= -f2-

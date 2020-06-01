@@ -36,3 +36,4 @@ install: all
 	install -t $(PREFIX)/bin urigetline
 	install -t $(PREFIX)/bin copy_start_nevermind.sh
 	install -t $(PREFIX)/bin choose
+	install -t $(PREFIX)/bin query_param
