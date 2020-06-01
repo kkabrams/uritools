@@ -1,0 +1,25 @@
+#!/bin/sh
+echo "what we're working on:" "$1"
+urn="$(printf '%s\n' "$1" | cut -d: -f1)"
+if [ "$urn" != "urn" ];then
+  echo "this isn't a urn. wtf are you waking me up for? I'm going back to bed. fuck this shit."
+  exit 1
+fi
+
+nid="$(printf '%s\n' "$1" | cut -d: -f2)"
+nss="$(printf '%s\n' "$1" | cut -d: -f3)"
+nss2="$(printf '%s\n' "$1" | cut -d: -f4-)"
+
+if [ "$nid" = "anonet" ];then
+  if [ "$nss" = "asn" ];then
+    uristart "whois://whois.ano/AS${nss2}"
+  elif [ "$nss" = "ip4" -o "$nss" = "ip6" -o "$nss" = "dom" ];then
+    uristart "whois://whois.ano/${nss2}"
+  fi
+fi
+
+if [ "$nid" = "ietf" ];then
+  if [ "$nss" = "rfc" ];then
+    uristart "https://tools.ietf.org/html/rfc""${nss2}"
+  fi
+fi
