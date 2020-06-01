@@ -1,0 +1,21 @@
+This is a handy little program to help you handle URIs that any program may want a handler for.
+Just point those programs looking for a handler at uristart.
+
+Then write a matching pattern, and a handler pipeline.
+
+The matching patterns are a series of pairs of URI-piece and a string.
+
+Each piece has a single letter you use to select the piece.
+
+here's an example that uses all of the parts:
+s://u:k@d:P/p?q#f
+
+where each piece is:
+s: scheme
+u: username
+k: password (k for key)
+d: domain
+P: port
+p: path
+q: query_string
+f: fragment_id
