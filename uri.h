@@ -285,6 +285,7 @@ int urifromline(struct uri *u,char *line) {
     if((u->port=strchr(u->domain,']')) && *u->domain == '[') {//this is an IPv6 host
       *u->port=0;
       u->port++;
+      u->domain++;//we need to skip the leading [
       if(*u->port == ':') {
         *u->port=0;
         u->port++;//if it ends up being empty, whatever. that's a URI like: http://host:/path
