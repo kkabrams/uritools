@@ -3,5 +3,7 @@
 ### then give the user a way of selecting on of them.
 ### it should output the selection on a line by itself.
 ### and use $1 as the message to give to the user.
-sed 's|,|\\,|g;s|:|\\:|g' | tr '\n' ',' | rev | cut -b2- | rev | tr '\n' '\0' | xargs -0 xmessage -nearmouse "$1" -print -buttons
-#dmenu -p "$1"
+#message=$1
+#shift
+#sed 's|,|\\,|g;s|:|\\:|g' | tr '\n' ',' | rev | cut -b2- | rev | tr '\n' '\0' | xargs -0 xmessage -nearmouse "$@" "$message" -print -buttons
+dmenu -l 10 -p "$1"
