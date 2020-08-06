@@ -26,8 +26,8 @@ if [ "$port" ];then
     content_type="redirect probably"
   fi
   if [ "${content_type}" = "text/html" -o "${content_type}" = "application/xhtml+xml" ];then
-#    title="$(printf "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n" "$path" "$domain" "$UA" | ncat -4 $SSL "$domain" "$port" | head -c 10000 | tr -d '\n' | tr '<' '\n' | grep -A 10 '^title>' | grep -B 10 '^\/title>' | cut '-d>' -f2)"
-    title="$(curl -si "$1" | head -c 10000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | sed 's/^ .//g' | sed 's/ .$//g' | grep .)"
+#    title="$(printf "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n" "$path" "$domain" "$UA" | ncat -4 $SSL "$domain" "$port" | head -c 10000000 | tr -d '\n' | tr '<' '\n' | grep -A 10 '^title>' | grep -B 10 '^\/title>' | cut '-d>' -f2)"
+    title="$(curl -si "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | sed 's/^ .//g' | sed 's/ .$//g' | grep .)"
     printf "title: %s\n" "$title" | html_entities_decode
   else
     printf "%s\n" "${a_header}"
