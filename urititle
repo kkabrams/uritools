@@ -59,6 +59,16 @@ magnet)
 ftp)
   curl "$1" 2>&1 | tail -n1
   ;;
+gopher)
+  type="$(printf "%s\n" "$1" | uricut -p | cut -b2- | cut -b1)"
+  if [ "$type" = 1 -o "$type" = "" ];then
+    printf "title: %s\n" "$(curl -s "$1" | grep ^i | head -n1 | cut -f1 | cut -b2-)"
+  elif [ "$type" = 0 ];then
+    printf "title: %s\n" "$(curl -s "$1" | head -n1)"
+  else
+    printf "title: don't know how to get title of non-1 gopher links"
+  fi
+  ;;
 ssh)
   if [ ! "$port" ];then
     port=22
