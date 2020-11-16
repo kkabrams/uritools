@@ -25,9 +25,9 @@ http*)
     if printf "%s\n" "${a_header}" | grep -i '^Content-Type: ' 2>&1 >/dev/null 2>&1;then
       content_type="$(printf '%s\n' "${a_header}" | cut '-d ' -f2- | cut '-d;' -f1)"
     fi
-    if printf "%s\n" "${a_header}" | grep -i '^Location: ' 2>&1 >/dev/null 2>&1;then
-      content_type="redirect. ${a_header}"
-    fi
+    #if printf "%s\n" "${a_header}" | grep -i '^Location: ' 2>&1 >/dev/null 2>&1;then
+    #  content_type="redirect. ${a_header}"
+    #fi
     if printf "%s\n" "${a_hreader}" | grep -i '^curl failed' 2>&1 >/dev/null 2>&1;then
       content_type="curl failed. cert expired? dunno yet. TODO: code openssl checker."
     fi
@@ -70,6 +70,8 @@ gopher)
     printf "title: %s\n" "$(curl -s "$1" | grep ^i | head -n1 | cut -f1 | cut -b2-)"
   elif [ "$type" = 0 ];then
     printf "title: %s\n" "$(curl -s "$1" | head -n1)"
+  elif [ "$type" = "h" ];then
+    printf "title: %s\n" "$(curl -s "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .)"
   else
     printf "title: don't know how to get title of non-1 gopher links"
   fi
