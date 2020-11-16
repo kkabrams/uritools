@@ -1,0 +1,17 @@
+#!/bin/sh
+hash="$(printf "$1" | sha256sum | cut '-d ' -f1)"
+mime_data="$(printf "%s\n" "$1" | cut -d, -f1)"
+data="$(printf "%s\n" "$1" | cut -d, -f2-)"
+#echo $mime_data
+is_base64="$(printf "%s\n" "$mime_data" | tr ';' '\n' | grep '^base64$')"
+media_type="$(printf "%s\n" "$mime_data" | tr ';' '\n' | head -n1)"
+### what are we going to do with this file?
+mkdir -p ~/.local/var/cache/data
+printf "%s\n" "$data" \
+ | if [ "$is_base64" ];then
+     base64 -d 
+   else
+     uriunescape
+   fi \
+ > ~/.local/var/cache/data/$hash
+uristart "file:///home/epoch/.local/var/cache/data/$hash?mime-type=$media_type"

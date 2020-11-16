@@ -37,3 +37,5 @@ install: all
 	install -t $(PREFIX)/bin copy_start_nevermind.sh
 	install -t $(PREFIX)/bin choose
 	install -t $(PREFIX)/bin query_param
+	install -t $(PREFIX)/bin data_handler
+	install -t $(PREFIX)/bin unshorten.sh
