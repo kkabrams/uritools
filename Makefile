@@ -4,7 +4,7 @@ CC:=gcc
 
 all: urimatch uricut urijoin uricmp uriunescape uriescape shorten
 
-shorten: LDFLAGS=-lcrypto
+shorten: LDLIBS=-lcrypto
 shorten: shorten.c
 
 urimatch: urimatch.c uri.h
