@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 scheme=$(printf "%s\n" "$1" | uricut -s)
 path=$(printf "%s\n" "$1" | uricut -p)
 qs=$(printf "%s\n" "$1" | uricut -q)
@@ -18,29 +18,63 @@ if [ "$qs" ];then
 fi
 case "$scheme" in
 http*)
-if [ "$port" ];then
+  if [ "$port" ];then
     UA="Mozilla/5.0 (impersonator)"
 #  content_type="$(printf "HEAD %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n" "$path" "$domain" "$UA" | ncat -4 $SSL "$domain" "$port" | grep -i '^Content-Type: ' | head -n1 | cut '-d ' -f2 | cut '-d;' -f1 | tr -d '\r\n')"
-    a_header="$(curl -Lsi "$1" | head -c 10000 | egrep -ai '^Location: |^Content-Type: ' | head -n1 | tr -d '\r\n')"
+    a_header="$((curl -Lsi "$1" || echo curl failed) | head -c 10000 | egrep -ai '^curl failed|^Location: |^Content-Type: ' | head -n1 | tr -d '\r\n')"
     if printf "%s\n" "${a_header}" | grep -i '^Content-Type: ' 2>&1 >/dev/null 2>&1;then
       content_type="$(printf '%s\n' "${a_header}" | cut '-d ' -f2- | cut '-d;' -f1)"
-    else
-      content_type="redirect probably"
+    fi
+    #if printf "%s\n" "${a_header}" | grep -i '^Location: ' 2>&1 >/dev/null 2>&1;then
+    #  content_type="redirect. ${a_header}"
+    #fi
+    if printf "%s\n" "${a_hreader}" | grep -i '^curl failed' 2>&1 >/dev/null 2>&1;then
+      content_type="curl failed. cert expired? dunno yet. TODO: code openssl checker."
     fi
     if [ "${content_type}" = "text/html" -o "${content_type}" = "application/xhtml+xml" ];then
 #    title="$(printf "GET %s HTTP/1.1\r\nHost: %s\r\nUser-Agent: %s\r\n\r\n" "$path" "$domain" "$UA" | ncat -4 $SSL "$domain" "$port" | head -c 10000 | tr -d '\n' | tr '<' '\n' | grep -A 10 '^title>' | grep -B 10 '^\/title>' | cut '-d>' -f2)"
       title="$(curl -si "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .)"
       printf "title: %s\n" "$title" | html_entities_decode
     else
-      printf "%s\n" "${a_header}"
+      printf "%s %s\n" "${a_header}" "${content_type}"
     fi
   fi
   ;;
 gemini)
-  printf "title: %s\n" "$(gemini-get "$1" | grep '^#' | head -n1 | sed 's/^#* *//g')"
+  first=1
+  gemini-get "$1" | while read -r line;do
+    if [ "$first" ];then
+      unset first
+      type="$(printf "%s\n" "$line" | tr -s ' ' | cut '-d ' -f2 | tr -d '\r')"
+      if [ "$type" != 'text/gemini' ];then
+        if [ "$type" = "text/html" ];then
+          head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .
+        else
+          printf "title: %s\n" "$(printf "%s\n" "$line" | tr '\t' ' ' | tr -s ' ' | cut '-d ' -f2-)"
+        fi
+      fi
+    else
+      printf "title: %s\n" "$(printf "%s\n" "$line" | grep '^#' | sed 's/^#* *//g')"
+    fi
+  done | head -n1
   ;;
 magnet)
   printf "title: %s\n" "$(printf "%s\n" "$1" | tr '&' '\n' | grep ^dn= | cut -d= -f2- | uriunescape)"
+  ;;
+ftp)
+  curl "$1" 2>&1 | tail -n1
+  ;;
+gopher)
+  type="$(printf "%s\n" "$1" | uricut -p | cut -b2- | cut -b1)"
+  if [ "$type" = 1 -o "$type" = "" ];then
+    printf "title: %s\n" "$(curl -s "$1" | grep ^i | head -n1 | cut -f1 | cut -b2-)"
+  elif [ "$type" = 0 ];then
+    printf "title: %s\n" "$(curl -s "$1" | head -n1)"
+  elif [ "$type" = "h" ];then
+    printf "title: %s\n" "$(curl -s "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .)"
+  else
+    printf "title: don't know how to get title of non-1 gopher links"
+  fi
   ;;
 ssh)
   if [ ! "$port" ];then
