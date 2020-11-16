@@ -2,7 +2,10 @@ CFLAGS:=-std=c11 -pedantic -Wall
 PREFIX:=/usr/local
 CC:=gcc
 
-all: urimatch uricut urijoin uricmp uriunescape uriescape
+all: urimatch uricut urijoin uricmp uriunescape uriescape shorten
+
+shorten: LDFLAGS=-lcrypto
+shorten: shorten.c
 
 urimatch: urimatch.c uri.h
 
@@ -37,3 +40,6 @@ install: all
 	install -t $(PREFIX)/bin copy_start_nevermind.sh
 	install -t $(PREFIX)/bin choose
 	install -t $(PREFIX)/bin query_param
+	install -t $(PREFIX)/bin shorten
+	chgrp shorten $(PREFIX)/bin/shorten
+	chmod g+s $(PREFIX)/bin/shorten
