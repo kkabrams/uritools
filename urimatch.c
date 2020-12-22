@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fnmatch.h>
 
 #define LINE_LENGTH 1024
 
@@ -10,7 +11,7 @@ int match(char negate,char *part,char *arg) {
   if(part == 0) return 1;//we found that the part isn't here!
  } else {
   if(part) {
-   if(!strcmp(part,arg)) return 1;
+   if(!fnmatch(arg,part,FNM_NOESCAPE)) return 1;
   }
  }
  return 0;
