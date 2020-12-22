@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 ### arguments:
 # $1: the URI we're starting
 # $2: the "referer" of the URI we're starting.
@@ -6,13 +6,51 @@
 # getsrv, urimatch, urijoin, uricut, some-way-to-ask-the-user-for-a-line (dmenu by default)
 # getsrv tries dig and host, you only need one or the other.
 ##might have to configure me.
-ASKUSER="dmenu -l 10 -p"
+ASKUSER="choose"
 
-if [ "$1" = "--check" ];then
-  check=check
-  shift
-else
-  check=dont
+check=dont
+
+uristart_config=~/.config/uristart.conf
+
+usage() {
+    printf "usage: uristart [-v|--verbose|-h|--help|-c|--check] [-f|--config file] URI\n"
+}
+
+while case "$1" in
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  --verbose|-v)
+    verbose=verbose
+    ;;
+  --config|-f)
+    shift
+    export uristart_config="$1"
+    ;;
+  --check|-c)
+    check=check
+    ;;
+  *)
+    break
+    ;;
+esac;do shift;done
+
+if [ "$verbose" ];then
+  echo "uristart: verbose:" "$verbose"
+  echo "uristart: config:" "$uristart_config" >&2
+  echo "uristart: check:" "$check" >&2
+  echo "uristart: other:" "$@" >&2
+fi
+
+if [ ! "$@" ];then
+  usage >&2 #to stderr because it is an error to not have any extra args to process
+  exit 1
+fi
+
+if [ ! -e "$uristart_config" ];then
+  printf "uristart: missing config file: %s\n" "$uristart_config" >&2
+  exit 1
 fi
 
 uri="${1}"
@@ -29,7 +67,7 @@ if printf "%s\n" "$uri" | urimatch nP >/dev/null;then
   uri="$(cat <(printf "%s\n" "$uri" | uricut) \
              <(getsrv $(printf "%s\n" "$uri" | uriprintf '%s '"$proto"' %d' | cut -d+ -f2-) 2>&- | tr ':' ' ' | sed 's/ /_port: /' | sed 's/^/domain: /' | tr _ '\n') \
           | urijoin 2>/dev/null)"
-  printf "srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
+  [ "$verbose" ] && printf "uristart: srv (%s) modified uri: %s\n" "$proto" "$uri" >&2
 fi
 
 ### if they do not have srv records, fall-back to /etc/services
@@ -37,27 +75,31 @@ if printf "%s\n" "$uri" | urimatch nP >/dev/null;then #if we *still* don't have 
   uri="$(cat <(printf "%s\n" "$uri" | uricut) \
              <(grep ^"$scheme"'\s' /etc/services | tr ' ' '\t' | tr -s '\t' | cut -f2 | cut -d/ -f1 | head -n1 | sed 's/^/port: /') \
           | urijoin 2>/dev/null)"
-  printf "getent modified uri: %s\n" "$uri" >&2
+  [ "$verbose" ] && printf "uristart: getent modified uri: %s\n" "$uri" >&2
 fi
 
 ### ask the user for a pipeline for starting these URIs if there isn't a pipeline already in the config.
-echo "the uri we're using: $uri" >&2
+[ "$verbose" ] && echo "uristart: the uri we're using: $uri" >&2
 if [ "$line" = "" ];then
   line="$(printf "" | $ASKUSER "protocol scheme (${scheme}) not configured yet. enter new pipeline to use:")"
   if [ "$line" = "" ];then
-    echo "user noped on entering new pipeline" >&2
+    echo "uristart: user noped on entering new pipeline" >&2
     exit 1
   fi
   printf '%s:\t%s\n' "${scheme}" "${line}" >> ~/.config/uristart.conf
 fi
 
 ### log the uri if it isn't logged already.
-if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
-  if [ "$2" ];then
-    printf "%s %s\n" "$uri" "$2" >> ~/.cache/uristart.log
-  else
-    printf "%s\n" "$uri" >> ~/.cache/uristart.log
+if [ -w ~/.cache/uristart.log ];then #only log if it is writable
+  if ! cut '-d ' -f1 ~/.cache/uristart.log | grep -Fx "$uri" 2>&1 >/dev/null;then #only log URIs that aren't already listed
+    if [ "$2" ];then
+      printf "%s %s\n" "$uri" "$2" >> ~/.cache/uristart.log
+    else
+      printf "%s\n" "$uri" >> ~/.cache/uristart.log
+    fi
   fi
+else
+  [ "$verbose" ] && printf "uristart: ~/.cacche/uristart.log is not writable. not logging.\n" >&2
 fi
 
 ### do the magic
