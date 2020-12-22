@@ -43,5 +43,4 @@ install: all
 	install -t $(PREFIX)/bin data_handler
 	install -t $(PREFIX)/bin unshorten.sh
 	install -t $(PREFIX)/bin shorten
-	chgrp shorten $(PREFIX)/bin/shorten
-	chmod g+s $(PREFIX)/bin/shorten
+	chgrp shorten $(PREFIX)/bin/shorten && chmod g+s $(PREFIX)/bin/shorten
