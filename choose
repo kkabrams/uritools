@@ -6,4 +6,8 @@
 #message=$1
 #shift
 #sed 's|,|\\,|g;s|:|\\:|g' | tr '\n' ',' | rev | cut -b2- | rev | tr '\n' '\0' | xargs -0 xmessage -nearmouse "$@" "$message" -print -buttons
-dmenu -l 10 -p "$1"
+if [ $DISPLAY ];then
+  dmenu -l 10 -p "$1"
+else
+  printf "%s" "$1" ; ledit head -n1
+fi
