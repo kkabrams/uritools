@@ -3,8 +3,12 @@ uri="$1"
 ### old way.
 # line="$(grep "^${scheme}:" ~/.config/uristart.conf | cut -d: -f2- | sed 's/^[ \t]*//g' | sed 's/\\/\\\\/g')"
 
+if [ ! "$uristart_config" ];then
+  uristart_config=~/.config/uristart.conf
+fi
+
 ### fancy way.
-grep '^[^#]' ~/.config/uristart.conf \
+grep '^[^#]' "$uristart_config" \
   | while read -r l;do
         uritmp="$uri"
         uritmp="$(printf "%s\n" "$l" \
