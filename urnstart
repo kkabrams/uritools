@@ -20,6 +20,10 @@ fi
 
 if [ "$nid" = "ietf" ];then
   if [ "$nss" = "rfc" ];then
-    uristart "https://tools.ietf.org/html/rfc""${nss2}"
+    uristart gopher://thebackupbox.net:70/0/rfc/rfc${nss2}.txt
   fi
+fi
+
+if [ "$nid" = "xkcd" ];then
+  uristart "https://xkcd.com/${nss}"
 fi
