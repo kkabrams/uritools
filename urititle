@@ -36,7 +36,7 @@ http*)
       title="$(curl -si "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .)"
       printf "title: %s\n" "$title" | html_entities_decode
     else
-      printf "%s %s\n" "${a_header}" "${content_type}"
+      printf "%s\n" "${a_header}"
     fi
   fi
   ;;
@@ -74,6 +74,16 @@ gopher)
     printf "title: %s\n" "$(curl -s "$1" | head -c 1000000 | tr -d '\n' | tr '<' '\n' | grep -iA 10 '^title' | grep -iB 10 '^\/title>' | cut '-d>' -f2 | tr '\t' ' ' | sed 's/^ *//g' | sed 's/ *$//g' | grep .)"
   else
     printf "title: don't know how to get title of non-1 gopher links"
+  fi
+  ;;
+urn)
+  nid="$(printf "%s\n" "$1" | cut -d: -f2)"
+  nss="$(printf "%s\n" "$1" | cut -d: -f3)"
+  nss2="$(printf "%s\n" "$1" | cut -d: -f4)"
+  if [ "$nid" = "ietf" ];then
+    if [ "$nss" = "rfc" ];then
+      cat "/var/db/rfc/rfc${nss2}.json" | jq .title
+    fi
   fi
   ;;
 ssh)
